@@ -1,0 +1,7 @@
+# data.yaml
+path: data/uav/dataset
+train: images/train
+val: images/val
+
+nc: 1  
+names: ['uav']  
