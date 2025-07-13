@@ -1,5 +1,6 @@
 pillow
 matplotlib
-polars
+polars-lts-cpu
 pycocotools
+opencv-python
 ultralytics

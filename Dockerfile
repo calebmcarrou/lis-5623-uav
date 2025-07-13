@@ -15,6 +15,8 @@ WORKDIR /UAV
 
 COPY . /UAV
 
+RUN export POLARS_SKIP_CPU_CHECK=1
+
 # Set up Python env
 RUN pip install --upgrade pip \
     && pip install -r requirements.txt
