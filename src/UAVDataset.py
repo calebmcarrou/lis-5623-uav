@@ -13,10 +13,10 @@ class UAVDataset(Dataset):
         self.idx = 0
         self.img_size = 640
         # we need to normalize our values. why not just do N(0,1)? well, you could
-        # but industry standard is to use these "ImageNet" values and they tend to 
-        # work really well on standard RGB images
-        self.ImageNet = {'mean': [0.485, 0.456, 0.406],
-                         'sd': [0.229, 0.224, 0.225]}
+        # but industry standard is to use RGB specs from your dataset or other
+        # standards such as ImageNet
+        self.stdize = {'mean': [0.655, .67, .67],
+                         'sd': [0.221, 0.205, 0.224]}
         # set up for train or val
         if subset == 'train':
             img_path, lab_path = 'data/dataset/images/train', 'data/dataset/labels/train'
@@ -30,7 +30,7 @@ class UAVDataset(Dataset):
             transforms.ToPILImage(),
             transforms.Resize((self.img_size, self.img_size)),
             transforms.ToTensor(),
-            transforms.Normalize(self.ImageNet['mean'], self.ImageNet['sd'])
+            transforms.Normalize(self.stdize['mean'], self.stdize['sd'])
         ])
 
     def __len__(self):
