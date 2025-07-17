@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 # this is heavily lifted from the pytorch tutorial on CNNs
-# modified to take in the 1280x720 images in the UAV dataset
+# modified to take in the 640x640 resized images in the UAV dataset
 # and to have 1 class, not 10
 class CNN(nn.Module):
 
@@ -18,7 +18,7 @@ class CNN(nn.Module):
         self.conv2 = nn.Conv2d(6, 16, 5)
 
         # fully connected layers for 1 class
-        self.fc1 = nn.Linear(16 * 317 * 177, 120)
+        self.fc1 = nn.Linear(16 * 157 * 157, 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 1) # 1 class prediction
 

@@ -12,6 +12,11 @@ class UAVDataset(Dataset):
         ### creates a dataset loader for the UAV dataset
         self.idx = 0
         self.img_size = 640
+        # we need to normalize our values. why not just do N(0,1)? well, you could
+        # but industry standard is to use these "ImageNet" values and they tend to 
+        # work really well on standard RGB images
+        self.ImageNet = {'mean': [0.485, 0.456, 0.406],
+                         'sd': [0.229, 0.224, 0.225]}
         # set up for train or val
         if subset == 'train':
             img_path, lab_path = 'data/dataset/images/train', 'data/dataset/labels/train'
@@ -25,6 +30,7 @@ class UAVDataset(Dataset):
             transforms.ToPILImage(),
             transforms.Resize((self.img_size, self.img_size)),
             transforms.ToTensor(),
+            transforms.Normalize(self.ImageNet['mean'], self.ImageNet['sd'])
         ])
 
     def __len__(self):
@@ -46,6 +52,8 @@ class UAVDataset(Dataset):
         # massage label out to get class (always 0) and bbox
         with open(self.labels[idx], 'r') as f:
             label = f.read()
+        # just grab the first line if more than one for this exericse
+        label = label.split('\n')[0]
         label = [float(i) for i in label.split(' ')]
         category = int(label[0])
         # convert bbox from yolo to bbox size
@@ -91,7 +99,7 @@ def create_dataloaders(batch_size: int=16):
     return train_dataloader, test_dataloader
 
 if __name__ == "__main__":
-    """
+    '''
     U = UAVDataset('train')
     img, label, bbox = U.__getitem__(0)
     print(bbox)
@@ -103,5 +111,5 @@ if __name__ == "__main__":
     rect = Rectangle((x_min, y_min), w, h, edgecolor='red', facecolor='none')
     ax.add_patch(rect)
     plt.savefig('data/test.png')
-    """
+    '''
     train_dl, test_dl = create_dataloaders()
