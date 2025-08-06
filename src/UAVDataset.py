@@ -28,7 +28,6 @@ class UAVDataset(Dataset):
         # resize all to (640x640) and make tensor
         self.transform = transforms.Compose([
             transforms.ToPILImage(),
-            transforms.Resize((self.img_size, self.img_size)),
             transforms.ToTensor(),
             transforms.Normalize(self.stdize['mean'], self.stdize['sd'])
         ])
@@ -63,21 +62,18 @@ class UAVDataset(Dataset):
         y *= height
         w *= width
         h *= height
-        # now we need to rescale for our (640x640) 
-        x_scale = self.img_size / width
-        y_scale = self.img_size / height
-        x *= x_scale
-        y *= y_scale
-        w *= x_scale
-        h *= y_scale
-        bbox = [int(i) for i in (x, y, w, h)]
+        # turn to top-left corner for patch
+        x1 = max(0, int(x - w / 2))
+        y1 = max(0, int(y - h / 2))
+        x2 = min(width, int(x + w / 2))
+        y2 = min(height, int(y + h / 2))
 
-        # do tensor conversions
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = self.transform(img)
-        bbox = torch.tensor(bbox, dtype=torch.float32)
+        patch = img[y1:y2, x1:x2] # create crop around bbox
+        patch = cv2.cvtColor(patch, cv2.COLOR_BGR2RGB)
+        patch = cv2.resize(patch, (32, 32)) # resize to 32x32
+        patch = self.transform(patch)
 
-        return img, category, bbox
+        return patch, category
 
 def create_dataloaders(batch_size: int=16):
     """Create the train & test dataloaders
@@ -101,15 +97,10 @@ def create_dataloaders(batch_size: int=16):
 if __name__ == "__main__":
     '''
     U = UAVDataset('train')
-    img, label, bbox = U.__getitem__(0)
-    print(bbox)
-    x, y, w, h = bbox
-    x_min = x - (w / 2)
-    y_min = y - (h / 2)
+    img, label = U.__getitem__(0)
+    print(label)
     fig, ax = plt.subplots()
     ax.imshow(img.permute(1,2,0))
-    rect = Rectangle((x_min, y_min), w, h, edgecolor='red', facecolor='none')
-    ax.add_patch(rect)
     plt.savefig('data/test.png')
     '''
     train_dl, test_dl = create_dataloaders()
